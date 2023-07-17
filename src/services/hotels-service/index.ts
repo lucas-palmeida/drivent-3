@@ -8,6 +8,8 @@ async function getHotels(userId: number): Promise<Hotel[]> {
     await verifyEnrollmentAndTicket(userId);
 
     const hotels = await hotelsRepository.getHotels();
+
+    if(!hotels) throw notFoundError();
     
     return hotels;
 }
