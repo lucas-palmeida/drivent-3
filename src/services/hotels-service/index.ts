@@ -9,7 +9,7 @@ async function getHotels(userId: number): Promise<Hotel[]> {
 
     const hotels = await hotelsRepository.getHotels();
 
-    if(!hotels) throw notFoundError();
+    if(hotels.length < 1) throw notFoundError();
     
     return hotels;
 }
