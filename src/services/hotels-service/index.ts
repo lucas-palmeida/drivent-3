@@ -15,7 +15,7 @@ async function getHotels(userId: number): Promise<Hotel[]> {
 }
 
 async function getHotelById(userId: number, hotelId: number): Promise<Hotel> {
-    await verifyEnrollmentAndTicket(hotelId);
+    await verifyEnrollmentAndTicket(userId);
 
     const hotel = await hotelsRepository.getHotelById(hotelId);
 
