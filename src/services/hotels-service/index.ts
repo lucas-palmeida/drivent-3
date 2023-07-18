@@ -19,19 +19,27 @@ async function getHotelById(userId: number, hotelId: number): Promise<Hotel> {
 
     const hotel = await hotelsRepository.getHotelById(hotelId);
 
-    if(!hotel) throw notFoundError();
+    if(!hotel) {
+        throw notFoundError();
+    }
 
     return hotel;
 }
 
 async function verifyEnrollmentAndTicket(userId: number) {
     const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
-    if (!enrollment) throw notFoundError();
+    if (!enrollment) {
+        throw notFoundError();
+    }
 
     const ticket = await ticketsRepository.findTicketByEnrollmentId(enrollment.id);
-    if (!ticket) throw notFoundError();
+    if (!ticket) {
+        throw notFoundError()
+    };
     
-    if(ticket.status !== TicketStatus.PAID || ticket.TicketType.isRemote || !ticket.TicketType.includesHotel) throw paymentRequiredError();
+    if(ticket.status !== TicketStatus.PAID || ticket.TicketType.isRemote || !ticket.TicketType.includesHotel) {
+        throw paymentRequiredError();
+    }
 }
 
 const hotelsService = {

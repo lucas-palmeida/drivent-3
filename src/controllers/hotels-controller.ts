@@ -22,17 +22,18 @@ export async function getHotels(req:AuthenticatedRequest, res: Response) {
 
 export async function getHotelById(req:AuthenticatedRequest, res: Response) {
     const { userId } = req;
-    const hotelId = Number(req.params);
-
-    if(!hotelId || isNaN(hotelId)) {
-        return res.sendStatus(httpStatus.BAD_REQUEST);
-    }
+    const { hotelId } = req.params;
 
     try {
-        const hotel = await hotelsService.getHotelById(userId, hotelId);
+        const hotel = await hotelsService.getHotelById(userId, Number(hotelId));
         return res.send(httpStatus.OK).send(hotel);
     } catch (error) {
-        if(error.name === 'NotFoundError') return res.sendStatus(httpStatus.NOT_FOUND);
-        return res.sendStatus(httpStatus.BAD_REQUEST);
+        if(error.name === 'NotFoundError') {
+            return res.sendStatus(httpStatus.NOT_FOUND);
+        } else if(error.name === 'PaymentRequiredError') {
+            return res.sendStatus(httpStatus.PAYMENT_REQUIRED);
+        } else {
+            return res.sendStatus(httpStatus.BAD_REQUEST);
+        }
     }
 }
