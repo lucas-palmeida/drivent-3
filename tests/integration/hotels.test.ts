@@ -1,5 +1,4 @@
 import app, { init } from "@/app";
-import { prisma } from "@/config";
 import faker from "@faker-js/faker";
 import supertest from "supertest";
 import { cleanDb, generateValidToken } from "../helpers";
@@ -10,7 +9,6 @@ import { TicketStatus } from "@prisma/client";
 
 beforeAll(async () => {
   await init();
-  await cleanDb();
 });
 
 beforeEach(async () => {
@@ -200,14 +198,11 @@ describe('GET /hotels/:hotelId', () => {
       const enrollment = await createEnrollmentWithAddress(user);
       const ticketType = await createTicketTypeRemoteOrHotel(false, true);
       const ticket = await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
-      const payment = await createPayment(ticket.id, ticketType.price);
+      await createPayment(ticket.id, ticketType.price);
       const hotel = await createHotel();
       const room = await createRoomsByHotelId(hotel.id);
       
       const response = await server.get(`/hotels/${hotel.id}`).set('Authorization', `Bearer ${token}`);
-
-      console.log(response.status);
-      console.log(response.body);
 
       expect(response.status).toEqual(httpStatus.OK);
       expect(response.body).toEqual({
@@ -228,5 +223,28 @@ describe('GET /hotels/:hotelId', () => {
         ],
       });
     });
+
+    it('should respond with status 200 and hotel data without rooms', async () => {
+      const user = await createUser();
+      const token = await generateValidToken(user);
+      const enrollment = await createEnrollmentWithAddress(user);
+      const ticketType = await createTicketTypeRemoteOrHotel(false, true);
+      const ticket = await createTicket(enrollment.id, ticketType.id, TicketStatus.PAID);
+      await createPayment(ticket.id, ticketType.price);
+      const hotel = await createHotel();
+      
+      const response = await server.get(`/hotels/${hotel.id}`).set('Authorization', `Bearer ${token}`);
+
+      expect(response.status).toEqual(httpStatus.OK);
+      expect(response.body).toEqual({
+        id: hotel.id,
+        name: hotel.name,
+        image: hotel.image,
+        createdAt: hotel.createdAt.toISOString(),
+        updatedAt: hotel.updatedAt.toISOString(),
+        Rooms: [],
+      });
+    });
+
   });
 });
